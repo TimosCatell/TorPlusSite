@@ -192,8 +192,10 @@ There's another small thing we should set up while we're here: we want https://t
 
 Most domain services support "URL forwarding" which will handle such requests (without exposing your server's IP).
 
-### Create a minimal site
+## Create a minimal site
 We can now create a minimal site that will play a video.
+
+### Upload to IPFS
 Assuming we have a video file:
 ```shell
 tp@vps:~$ ls -l video.mp4
@@ -209,11 +211,28 @@ tp@vps:~$ sudo mv video.mp4 work/ipfs/tmp
 tp@vps:~$ sudo docker exec -it torplus /bin/bash
 root@e13258b2742d:/opt/torplus# ./ipfs add ~/.ipfs/tmp/video.mp4
 added QmPmhva4fcVs8P5iTT2psjqQGMGrkXmXTewNkHsR6n5gUY video.mp4
- 133.66 MiB / 133.66 MiB [============================================================================================================] 
+ 133.66 MiB / 133.66 MiB [==================================================================] 
  root@e13258b2742d:/opt/torplus# exit
  tp@vps:~$ sudo rm work/ipfs/tmp/video.mp4
 ```
 
 We've added `QmPmhva4fcVs8P5iTT2psjqQGMGrkXmXTewNkHsR6n5gUY` to the local IPFS node. We can now create a mini-site that will simply play this file (note that although initially, the file will be served by our server, other nodes will ultimately cache the video and serve it to clients without hitting our server. At least, that's TorPlus claims on their site).
+
+### Create a minimal site
+Now let's create the site.
+We'll use the sample HTML code from the TorPlus GitHub page:
+```shell
+tp@vps:~$ cat work/static/index.html
+<html><head><meta charset="utf-8"><title>video</title></head>
+<body>
+   <video width="400" height="300" controls="controls" controlsList="nodownload" autoplay muted>
+      <source src="/ipfs/QmPmhva4fcVs8P5iTT2psjqQGMGrkXmXTewNkHsR6n5gUY">
+   </video>
+</body>
+</html>
+```
+
+### Check that site works
+Point your TorPlus-enabled Chrome browser at your side - e.g. https://torplus.abc.xyz and you should see the video.
 
 
