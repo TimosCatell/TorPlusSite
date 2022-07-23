@@ -85,7 +85,7 @@ You'll need to pass the secret to the TorPlus server you'll be starting soon.
 ## Docker
 Next, let's install Docker, as TorPlus is pre-packaged as a bunch of Docker images.
 
-``shell
+```shell
 tp@vps:~$ sudo apt install docker.io
 Reading package lists... Done
 Building dependency tree
