@@ -41,6 +41,7 @@ Enter the new value, or press ENTER for the default
 Is the information correct? [Y/n] y
 root@vps:~# usermod -aG sudo tp
 root@vps:~# su - tp
+tp@vps:~$ mkdir work
 tp@vps:~$
 ```
 
@@ -93,13 +94,25 @@ Reading state information... Done
 docker.io is already the newest version (20.10.12-0ubuntu2~20.04.1).
 0 upgraded, 0 newly installed, 0 to remove and 254 not upgraded.
 ```
+
+## IPFS docker
 And let's pull the docker image we'll be using:
 ```shell
-tp@vps:~$ sudo docker pull torplusdev/production:ipfs-latest
-Digest: sha256:864c608fc647b42143f686237f7f34961ab043f36f815044d23f8cee9dac508d
-Status: Image is up to date for torplusdev/production:ipfs-latest
-docker.io/torplusdev/production:ipfs-latest
+tp@vps:~$ sudo docker pull torplusdev/production:ipfs_haproxy-latest
+ipfs_haproxy-latest: Pulling from torplusdev/production
+Digest: sha256:f577b5eb87f44884122df1e2b966b22e60934cf49eb2361ef9446adfff6dbcd4
+Status: Image is up to date for torplusdev/production:ipfs_haproxy-latest
+docker.io/torplusdev/production:ipfs_haproxy-latest
 ```
+
+Start the image:
+```shell
+tp@vps:~$ sudo docker run -d --name torplus -e nickname=tpvps -e seed=SCDENN4TJQH5LF4CSXX4Y564EC43AEP47TLYUDXIP6ZX4EDRGT5B6QA6 -e role=hs_client -e HOST_PORT=80 -e PP_ENV=prod -e http_address=127.0.0.1:80 -e useNginx=1 -p 80:80 -p 28000:28080 -v /home/tp/work/tor:/root/tor -v /home/tp/work/ipfs:/root/.ipfs -v /home/tp/work/hidden_service:/root/hidden_service -v /home/tp/work/static:/var/www/html --rm torplusdev/production:ipfs_haproxy-latest
+2389b2f3dafa34bba3f6571525a59085f3fcce81e36ed2ba0d6e77133e61505f
+tp@vps:~$ 
+```
+
+Where you should replace the seed (`SC...`) with your Stellar secret.
 
 ## DNS records
 TorPlus uses DNS to resolve the onion address for a site. This is done by adding `torplus=<onion address>` to the TXT record (without the `.onion` part)
