@@ -74,12 +74,12 @@ Note that some name service providers (e.g. porkbun) will generate Let's Encrypt
 Assuming you have downloaded the certificate, you should now have the "full-chain" certificate, and private key. Assuming `domain.cert.pem` is the certificate and `private.key.pem` is the private key, we'll need to concatenate them and put the resulting file in the `ssl` directory:
 
 ```shell
-tp@vps:~$ export domain=example.com
+tp@vps:~$ export domain=abc.xyz
 tp@vps:~$ mkdir -p work/ssl/
 tp@vps:~$ cat domain.cert.pem private.key.pem > work/ssl/$domain.pem
 ```
 
-with `example.com` replaced with your domain name, of course.
+with `abc.xyz` replaced with your domain name, of course.
 
 
 ## Stellar
@@ -186,9 +186,34 @@ tp@vps:~$ cat $workspace/hidden_service/hsv3/hostname
 7v6hk5tugyq5g5wmnbsohasqicexbkhwzmtzu7ezy6nitvec42rs4iid.onion
 ```
 
-Don't forget to remove the .onion part! and note that the TXT record is for *torplus*.yourdomain.name.
+Don't forget to remove the .onion part! and note that the TXT record is for *torplus*.abc.xyz.
 
 There's another small thing we should set up while we're here: we want https://torplus.mydomain.com to point to https://torplus.com/requires/.
 
 Most domain services support "URL forwarding" which will handle such requests (without exposing your server's IP).
+
+### Create a minimal site
+We can now create a minimal site that will play a video.
+Assuming we have a video file:
+```shell
+tp@vps:~$ ls -l video.mp4
+-rw-r--r-- 1 tp tp 140152709 Jul 20 11:23 video.mp4
+```
+
+Let's upload it into the local IPFS node.
+The following is a bit of a hack, but will work (improvements are left as exercise):
+
+```shell
+tp@vps:~$ sudo mkdir -p work/ipfs/tmp
+tp@vps:~$ sudo mv video.mp4 work/ipfs/tmp
+tp@vps:~$ sudo docker exec -it torplus /bin/bash
+root@e13258b2742d:/opt/torplus# ./ipfs add ~/.ipfs/tmp/video.mp4
+added QmPmhva4fcVs8P5iTT2psjqQGMGrkXmXTewNkHsR6n5gUY video.mp4
+ 133.66 MiB / 133.66 MiB [============================================================================================================] 
+ root@e13258b2742d:/opt/torplus# exit
+ tp@vps:~$ sudo rm work/ipfs/tmp/video.mp4
+```
+
+We've added `QmPmhva4fcVs8P5iTT2psjqQGMGrkXmXTewNkHsR6n5gUY` to the local IPFS node. We can now create a mini-site that will simply play this file (note that although initially, the file will be served by our server, other nodes will ultimately cache the video and serve it to clients without hitting our server. At least, that's TorPlus claims on their site).
+
 
