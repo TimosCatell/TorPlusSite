@@ -45,6 +45,43 @@ tp@vps:~$ mkdir work
 tp@vps:~$
 ```
 
+## TLS/SSL
+We will need a valid TLS certificate for our site.
+You can use [Let's Encrypt](https://letsencrypt.org/) to generate a free certificate. There's even a nice [tool](https://certbot.eff.org/) that makes this process effortless.
+
+There's just one problem: your IP will be logged:
+```shell
+root@vps:~# certbot certonly --manual --preferred-challenges=dns -d abc.xyz
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Plugins selected: Authenticator manual, Installer None
+Obtaining a new certificate
+Performing the following challenges:
+dns-01 challenge for abc.xyz
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+NOTE: The IP of this machine will be publicly logged as having requested this
+certificate. If you're running certbot in manual mode on a machine that is not
+your server, please ensure you're okay with that.
+
+Are you OK with your IP being logged?
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+(Y)es/(N)o:
+```
+
+This may or may not be a problem.
+Note that some name service providers (e.g. porkbun) will generate Let's Encrypt certificates automatically. You can then download these certificates to the VPS - which does not involve giving up your IP address (the downside is you'll need to refresh the certificate manually every 3 months).
+
+Assuming you have downloaded the certificate, you should now have the "full-chain" certificate, and private key. Assuming `domain.cert.pem` is the certificate and `private.key.pem` is the private key, we'll need to concatenate them and put the resulting file in the `ssl` directory:
+
+```shell
+tp@vps:~$ export domain=example.com
+tp@vps:~$ mkdir -p work/ssl/
+tp@vps:~$ cat domain.cert.pem private.key.pem > work/ssl/$domain.pem
+```
+
+with `example.com` replaced with your domain name, of course.
+
+
 ## Stellar
 We need a Stellar wallet containing at least 1 LUX.
 We can create a wallet directly on the new machine:
@@ -95,7 +132,6 @@ docker.io is already the newest version (20.10.12-0ubuntu2~20.04.1).
 0 upgraded, 0 newly installed, 0 to remove and 254 not upgraded.
 ```
 
-## IPFS docker
 And let's pull the docker image we'll be using:
 ```shell
 tp@vps:~$ sudo docker pull torplusdev/production:ipfs_haproxy-latest
@@ -107,7 +143,21 @@ docker.io/torplusdev/production:ipfs_haproxy-latest
 
 Start the image:
 ```shell
-tp@vps:~$ sudo docker run -d --name torplus -e nickname=tpvps -e seed=SCDENN4TJQH5LF4CSXX4Y564EC43AEP47TLYUDXIP6ZX4EDRGT5B6QA6 -e role=hs_client -e HOST_PORT=80 -e PP_ENV=prod -e http_address=127.0.0.1:80 -e useNginx=1 -p 80:80 -p 28000:28080 -v /home/tp/work/tor:/root/tor -v /home/tp/work/ipfs:/root/.ipfs -v /home/tp/work/hidden_service:/root/hidden_service -v /home/tp/work/static:/var/www/html --rm torplusdev/production:ipfs_haproxy-latest
+tp@vps:~$ sudo docker run -d --name torplus \
+-e nickname=tpvps \
+-e seed=SCDENN4TJQH5LF4CSXX4Y564EC43AEP47TLYUDXIP6ZX4EDRGT5B6QA6 \
+-e role=hs_client \
+-e HOST_PORT=80 \
+-e PP_ENV=prod \
+-e http_address=127.0.0.1:80 \
+-e useNginx=1 \
+-p 80:80 -p 28000:28080 \
+-v /home/tp/work/tor:/root/tor \
+-v /home/tp/work/ipfs:/root/.ipfs \
+-v /home/tp/work/hidden_service:/root/hidden_service \
+-v /home/tp/work/static:/var/www/html \
+--rm torplusdev/production:ipfs_haproxy-latest \
+-v /home/tp/work/ssl:/etc/ssl/torplus/
 2389b2f3dafa34bba3f6571525a59085f3fcce81e36ed2ba0d6e77133e61505f
 tp@vps:~$ 
 ```
@@ -136,7 +186,7 @@ tp@vps:~$ cat $workspace/hidden_service/hsv3/hostname
 7v6hk5tugyq5g5wmnbsohasqicexbkhwzmtzu7ezy6nitvec42rs4iid.onion
 ```
 
-(don't forget to remove the .onion part)
+Don't forget to remove the .onion part! and note that the TXT record is for *torplus*.<domain>.
 
 There's another small thing we should set up while we're here: we want https://torplus.mydomain.com to point to https://torplus.com/requires/.
 
