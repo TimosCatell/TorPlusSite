@@ -186,7 +186,7 @@ tp@vps:~$ cat $workspace/hidden_service/hsv3/hostname
 7v6hk5tugyq5g5wmnbsohasqicexbkhwzmtzu7ezy6nitvec42rs4iid.onion
 ```
 
-Don't forget to remove the .onion part! and note that the TXT record is for *torplus*.<domain>.
+Don't forget to remove the .onion part! and note that the TXT record is for *torplus*.yourdomain.name.
 
 There's another small thing we should set up while we're here: we want https://torplus.mydomain.com to point to https://torplus.com/requires/.
 
