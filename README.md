@@ -151,7 +151,8 @@ tp@vps:~$ sudo docker run -d --name torplus \
 -e PP_ENV=prod \
 -e http_address=127.0.0.1:80 \
 -e useNginx=1 \
--p 80:80 -p 28000:28080 \
+-p 127.0.0.1:80:80 \
+-p 127.0.0.1:28000:28080 \
 -v /home/tp/work/tor:/root/tor \
 -v /home/tp/work/ipfs:/root/.ipfs \
 -v /home/tp/work/hidden_service:/root/hidden_service \
@@ -163,6 +164,8 @@ tp@vps:~$
 ```
 
 Where you should replace the seed (`SC...`) with your Stellar secret.
+
+Note that you can access http://127.0.0.1:28000 to check the status of the server. Similarly http://127.0.0.1:80 will access the site, without going through TorPlus. Needless to say, don't expose those the the big bad Internet: use ssh tunneling or something similar to forward these ports.
 
 ## DNS records
 TorPlus uses DNS to resolve the onion address for a site. This is done by adding `torplus=<onion address>` to the TXT record (without the `.onion` part)
