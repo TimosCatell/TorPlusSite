@@ -153,6 +153,7 @@ tp@vps:~$ sudo docker run -d --name torplus \
 -e useNginx=1 \
 -p 127.0.0.1:80:80 \
 -p 127.0.0.1:28000:28080 \
+-p  127.0.0.1:5001:5001 \
 -v /home/tp/work/tor:/root/tor \
 -v /home/tp/work/ipfs:/root/.ipfs \
 -v /home/tp/work/hidden_service:/root/hidden_service \
@@ -198,6 +199,24 @@ Most domain services support "URL forwarding" which will handle such requests (w
 ## Create a minimal site
 We can now create a minimal site that will play a video.
 
+First, let's install IPFS on the host machine (we only need the IPFS CLI):
+
+```shell
+tp@vps:~$ sudo snap install ipfs
+```
+
+(you'll be prompted if you need to install snap)
+
+Let's see that we can connect to the TorPlus IPFS running in docker:
+```shell
+tp@vps:~$ ipfs --api /ip4/127.0.0.1/tcp/5001 stats bw
+Bandwidth
+TotalIn: 101 kB
+TotalOut: 19 kB
+RateIn: 4.1 kB/s
+RateOut: 1.5 kB/s
+```
+
 ### Upload to IPFS
 Assuming we have a video file:
 ```shell
@@ -206,17 +225,12 @@ tp@vps:~$ ls -l video.mp4
 ```
 
 Let's upload it into the local IPFS node.
-The following is a bit of a hack, but will work (improvements are left as exercise):
 
 ```shell
-tp@vps:~$ sudo mkdir -p work/ipfs/tmp
-tp@vps:~$ sudo mv video.mp4 work/ipfs/tmp
-tp@vps:~$ sudo docker exec -it torplus /bin/bash
-root@e13258b2742d:/opt/torplus# ./ipfs add ~/.ipfs/tmp/video.mp4
+tp@vps:~$ ipfs --api /ip4/127.0.0.1/tcp/5001 add video.mp4
 added QmPmhva4fcVs8P5iTT2psjqQGMGrkXmXTewNkHsR6n5gUY video.mp4
  133.66 MiB / 133.66 MiB [==================================================================] 
- root@e13258b2742d:/opt/torplus# exit
- tp@vps:~$ sudo rm work/ipfs/tmp/video.mp4
+tp@vps:~$ 
 ```
 
 We've added `QmPmhva4fcVs8P5iTT2psjqQGMGrkXmXTewNkHsR6n5gUY` to the local IPFS node. We can now create a mini-site that will simply play this file (note that although initially, the file will be served by our server, other nodes will ultimately cache the video and serve it to clients without hitting our server. At least, that's TorPlus claims on their site).
