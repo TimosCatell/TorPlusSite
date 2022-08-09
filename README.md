@@ -158,8 +158,8 @@ tp@vps:~$ sudo docker run -d --name torplus \
 -v /home/tp/work/ipfs:/root/.ipfs \
 -v /home/tp/work/hidden_service:/root/hidden_service \
 -v /home/tp/work/static:/var/www/html \
---rm torplusdev/production:ipfs_haproxy-latest \
--v /home/tp/work/ssl:/etc/ssl/torplus/
+-v /home/tp/work/ssl:/etc/ssl/torplus/ \
+--rm torplusdev/production:ipfs_haproxy-latest
 2389b2f3dafa34bba3f6571525a59085f3fcce81e36ed2ba0d6e77133e61505f
 tp@vps:~$ 
 ```
