@@ -1,3 +1,6 @@
+Please also check my [Medium article](https://medium.com/@timoscatell/torplus-120fb4f1c6be) about TorPlus!
+
+
 # Setting up a site
 
 ## Cloud-based server
